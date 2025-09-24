@@ -26,23 +26,29 @@ async function gerarResposta(mensagemUsuario) {
           Authorization: `Bearer ${huggingFaceToken}`,
           'Content-Type': 'application/json'
         },
-        timeout: 10000
+        timeout: 20000 // tempo aumentado para evitar timeout
       }
     );
 
     const resultado = resposta.data;
 
-    if (Array.isArray(resultado) && resultado[0]?.generated_text) {
-      return resultado[0].generated_text;
+    if (Array.isArray(resultado)) {
+      const texto = resultado[0]?.generated_text || resultado[0]?.answer;
+      if (texto) return texto;
     }
 
-    if (typeof resultado === 'object' && resultado.generated_text) {
-      return resultado.generated_text;
+    if (typeof resultado === 'object') {
+      const texto = resultado.generated_text || resultado.answer;
+      if (texto) return texto;
     }
 
     return 'Desculpe, não consegui entender a resposta da IA.';
   } catch (error) {
-    console.error('Erro ao gerar resposta da IA:', error.response?.status, error.response?.data || error.message);
+    console.error('Erro ao gerar resposta da IA:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
     return 'Ocorreu um erro ao tentar gerar a resposta. Tente novamente mais tarde.';
   }
 }
