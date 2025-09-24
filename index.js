@@ -19,27 +19,26 @@ const client = twilio(accountSid, authToken);
 async function gerarResposta(mensagemUsuario) {
   try {
     const resposta = await axios.post(
-      'https://api-inference.huggingface.co/models/google/flan-t5-large',
+      'https://api-inference.huggingface.co/models/facebook/bart-large',
       { inputs: mensagemUsuario },
       {
         headers: {
           Authorization: `Bearer ${huggingFaceToken}`,
           'Content-Type': 'application/json'
         },
-        timeout: 20000 // tempo aumentado para evitar timeout
+        timeout: 20000
       }
     );
 
     const resultado = resposta.data;
 
+    // O modelo retorna vetores, então vamos tratar isso com uma resposta genérica
     if (Array.isArray(resultado)) {
-      const texto = resultado[0]?.generated_text || resultado[0]?.answer;
-      if (texto) return texto;
+      return 'Recebi uma resposta técnica da IA, mas não consegui convertê-la em texto direto.';
     }
 
     if (typeof resultado === 'object') {
-      const texto = resultado.generated_text || resultado.answer;
-      if (texto) return texto;
+      return 'Recebi uma resposta técnica da IA, mas não consegui convertê-la em texto direto.';
     }
 
     return 'Desculpe, não consegui entender a resposta da IA.';
